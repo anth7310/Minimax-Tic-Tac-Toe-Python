@@ -43,12 +43,24 @@ class Board:
 
 
 def minimax(board, player):
-    if board.calculateWinner() == 'x':
+    """ Minimax algorithm on Tic Tac Toe 
+    """
+    result = board.calculateWinner()
+    if result == 'x':
         return 1
-    elif board.calculateWinner() == 'o':
+    elif result == 'o':
         return -1
-    elif board.calculateWinner() == 'tie':
+    elif result == 'tie':
         return 0
+
+    # check if can win within next move
+    for idx, square in enumerate(board.board):
+        if square == None:
+            board.assign(idx, player)
+            if board.calculateWinner() == player:
+                board.deassign(idx)
+                return idx
+            board.deassign(idx)
 
     root = []
     for idx, square in enumerate(board.board):
@@ -58,16 +70,87 @@ def minimax(board, player):
             board.deassign(idx)
         else: # to maintain root length
             root.append(0)
+    # [ item[] for item in list(enumerate(root)) if item[1] == None ]
+
     if player == 'x':
         return root.index(max(root))
     else:
         return root.index(min(root))
 
+def alpha_Beta(board, player, alpha, beta):
+    """ Minimax algorithm on Tic Tac Toe with minimax pruning
+    """
+    if board.calculateWinner() == 'x':
+        return 1
+    elif board.calculateWinner() == 'o':
+        return -1
+    elif board.calculateWinner() == 'tie':
+        return 0
+
+    # check if can win within next move
+    for idx, square in enumerate(board.board):
+        if square == None:
+            board.assign(idx, player)
+            if board.calculateWinner() == player:
+                board.deassign(idx)
+                return idx
+            board.deassign(idx)
+
+    root = []
+    if player == 'x':
+        value = -float("Inf")
+        for idx, square in enumerate(board.board):
+            if square == None:
+                board.assign(idx, player)
+                
+                value = max(value, alpha_Beta(board, player='o', alpha=alpha, beta=beta))
+                alpha = max(alpha, value)
+                board.deassign(idx)
+                root.append(value)
+                if alpha >= beta: # cut off beta
+                    break
+            else: # to maintain root length
+                root.append(0)
+        return root.index(max(root))
+        
+    else:
+        value = float("Inf")
+        for idx, square in enumerate(board.board):
+            if square == None:
+                board.assign(idx, player)
+                
+                value = min(value, alpha_Beta(board, player='x', alpha=alpha, beta=beta))
+                beta = min(beta, value)
+                board.deassign(idx)
+                root.append(value)
+                if alpha >= beta: # cut off alpha
+                    break
+            else: # to maintain root length
+                root.append(0)
+        return root.index(min(root))
+
+
+"""
+x | o |
+o | x | 
+  |   |
+"""
+# game = Board()
+# game.assign(0, 'x')
+# game.assign(1, 'o')
+# game.assign(4, 'x')
+# game.assign(3, 'o')
+# print(game)
+# x = alpha_Beta(game, player='x', alpha=-float('Inf'), beta=float("Inf"))
+# print(x)
+
+
+## Play Game
 game = Board()
-game.assign(0, 'x')
-game.assign(1, 'o')
-game.assign(3, 'x')
-game.assign(2, 'o')
-x = minimax(game, player='x')
-print(x)
-print(game)
+while True:
+    print(game)
+    x = int(input())
+    game.assign(x, 'x')
+    o = minimax(game, player='o')
+    game.assign(o, 'o')
+    
