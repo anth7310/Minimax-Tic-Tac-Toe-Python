@@ -39,7 +39,12 @@ class Board:
             return 'tie'
 
     def __str__(self):
-        return str(self.board)
+        return (
+            str(self.board[:3]) + '\n' +
+            str(self.board[3:6]) + '\n' +
+            str(self.board[6:])
+        )
+        # return str(self.board)
 
 
 def minimax(board, player):
@@ -53,7 +58,7 @@ def minimax(board, player):
     elif result == 'tie':
         return 0
 
-    # check if can win within next move
+    # return if can win within next move
     for idx, square in enumerate(board.board):
         if square == None:
             board.assign(idx, player)
@@ -70,12 +75,16 @@ def minimax(board, player):
             board.deassign(idx)
         else: # to maintain root length
             root.append(0)
-    # [ item[] for item in list(enumerate(root)) if item[1] == None ]
 
+    # unfilled spots in board
+    unfilled = [ i for i, v in enumerate(root) if (board.board[i] == None)]
+    # select optimal index from unfilled
+    d = { root[k]: v for k, v in enumerate(unfilled) }
+    print(d)
     if player == 'x':
-        return root.index(max(root))
+        return d[max(d)]
     else:
-        return root.index(min(root))
+        return d[min(d)]
 
 def alpha_Beta(board, player, alpha, beta):
     """ Minimax algorithm on Tic Tac Toe with minimax pruning
@@ -151,6 +160,7 @@ while True:
     print(game)
     x = int(input())
     game.assign(x, 'x')
+    print(game)
     o = minimax(game, player='o')
     game.assign(o, 'o')
     
